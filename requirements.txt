@@ -6,5 +6,5 @@ langchain-aws==0.1.2
 duckduckgo-search==5.3.0
 pygraphviz==1.12
 docx2pdf
-docx
+python-docx
 sagemaker

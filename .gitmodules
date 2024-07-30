@@ -1,0 +1,3 @@
+[submodule "StoryDiffusion"]
+	path = StoryDiffusion
+	url = https://github.com/xiehust/StoryDiffusion.git

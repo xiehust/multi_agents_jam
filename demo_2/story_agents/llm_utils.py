@@ -40,7 +40,7 @@ class CustJsonOuputParser(BaseOutputParser[str]):
         else:
             return {}    
         text = preprocess_answer_json(text)
-        new_dict = json.loads()
+        new_dict = json.loads(text)
         
         return new_dict
 

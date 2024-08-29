@@ -44,7 +44,7 @@ class ImageGenerator(BaseModel):
         invoke SDXL model in a Amaozn Bedrock to generate identity images
 
     """
-    model_id: str = Field(default="stability.stable-diffusion-xl-v1")
+    model_id: str = Field(default="amazon.titan-image-generator-v2:0")
     cfg_scale: int = Field( default=7)
     steps:int = Field( default=50)
     samples:int = Field( default=1)
@@ -72,18 +72,27 @@ class ImageGenerator(BaseModel):
             body=body, modelId=model_id, accept=accept, contentType=content_type
         )
         response_body = json.loads(response.get("body").read())
+        
+        if model_id.startswith("stability"):
+            base64_image = response_body.get("artifacts")[0].get("base64")
+            base64_bytes = base64_image.encode('ascii')
+            image_bytes = base64.b64decode(base64_bytes)
 
-        base64_image = response_body.get("artifacts")[0].get("base64")
-        base64_bytes = base64_image.encode('ascii')
-        image_bytes = base64.b64decode(base64_bytes)
+            finish_reason = response_body.get("artifacts")[0].get("finishReason")
 
-        finish_reason = response_body.get("artifacts")[0].get("finishReason")
+            if finish_reason == 'ERROR' or finish_reason == 'CONTENT_FILTERED':
+                raise ImageError(f"Image generation error. Error code is {finish_reason}")
+        else:
+            base64_image = response_body.get("images")[0]
+            base64_bytes = base64_image.encode('ascii')
+            image_bytes = base64.b64decode(base64_bytes)
 
-        if finish_reason == 'ERROR' or finish_reason == 'CONTENT_FILTERED':
-            raise ImageError(f"Image generation error. Error code is {finish_reason}")
+            finish_reason = response_body.get("error")
 
+            if finish_reason is not None:
+                raise ImageError(f"Image generation error. Error is {finish_reason}")
 
-        # logger.info("Successfully generated image withvthe SDXL 1.0 model %s", model_id)
+        print(f"Successfully generated image with model {model_id}")
 
         return image_bytes
 
@@ -220,7 +229,20 @@ class StoryDiffusionGenerator():
                 name='story-diffusion'
         )
     
-    def generate_images(self,general_prompt:str,prompt_array:str,id_length:int=2, ref_imgs: List[Any]= [],comic_type:str='Classic Comic Style', style:str = 'Japanese Anime',sd_type:str="Unstable", height:int = 512, width :int = 768) -> list:
+    def generate_real_identity_images(self,prompt:str,height:int = 768, width :int = 768):
+        images = self.generate_images(general_prompt = '',
+                                                            style="Cinematic",
+                                                            comic_type = "Classic Comic Style",
+                                                            prompt_array=prompt,
+                                                            id_length= 0,
+                                                            sd_type = "RealVision",
+                                                            ref_imgs=[],height=height,width=width) 
+        for img in images:
+            if img.size[0] < 1024:
+                return img
+        return None
+        
+    def generate_images(self,general_prompt:str,prompt_array:str,id_length:int=2, ref_imgs: List[Any]= [],comic_type:str='Classic Comic Style', style:str = 'Japanese Anime',sd_type:str="Unstable", height:int = 768, width :int = 768) -> list:
         data = { "general_prompt": general_prompt,
                         "prompt_array" : prompt_array,
                         "style" : style,

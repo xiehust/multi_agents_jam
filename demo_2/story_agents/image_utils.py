@@ -229,13 +229,13 @@ class StoryDiffusionGenerator():
                 name='story-diffusion'
         )
     
-    def generate_real_identity_images(self,prompt:str,height:int = 768, width :int = 768):
-        images = self.generate_images(general_prompt = '',
-                                                            style="Cinematic",
+    def generate_real_identity_images(self,prompt:str, general_prompt:str = '', height:int = 768, width :int = 768):
+        images = self.generate_images(general_prompt = general_prompt,
+                                                            style="Photographic",
                                                             comic_type = "Classic Comic Style",
                                                             prompt_array=prompt,
                                                             id_length= 0,
-                                                            sd_type = "RealVision",
+                                                            sd_type = "Unstable",
                                                             ref_imgs=[],height=height,width=width) 
         for img in images:
             if img.size[0] < 1024:

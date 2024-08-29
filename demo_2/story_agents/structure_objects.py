@@ -36,9 +36,9 @@ class Persona(BaseModel):
     """
         Persona class to format the LLM output
     """
-    affiliation: str = Field(
-        description="Primary affiliation of the character.",
-    )
+    # affiliation: str = Field(
+    #     description="Primary affiliation of the character.",
+    # )
     name: str = Field(
         description="only first name of character, need to match with '^[a-zA-Z0-9_-]{1,64}$'",
     )
@@ -57,7 +57,7 @@ class Persona(BaseModel):
 
     @property
     def persona(self) -> str:
-        return f"Name: {self.name}\nRole: {self.role}\nAffiliation: {self.affiliation}\nBackground: {self.background}\nFigure:{self.figure}\nAppearance: {self.appearance}\n"
+        return f"Name: {self.name}\nRole: {self.role}\nBackground: {self.background}\nFigure:{self.figure}\nAppearance: {self.appearance}\n"
     
 class Character(BaseModel):
     """

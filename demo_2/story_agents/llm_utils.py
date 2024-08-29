@@ -33,7 +33,7 @@ class CustJsonOuputParser(BaseOutputParser[str]):
     def parse(self, text: str) -> str:
         if self.verbose:
             print(text)
-        pattern = r"<answer>(.*?)</answer>"
+        pattern = r"```json(.*?)```"
         match = re.search(pattern, text, re.DOTALL)
         if match:
             text = match.group(1)

@@ -6,7 +6,7 @@ You will ALWAYS follow the below guidelines when you are answering a question:
 <schema>
 {schema}
 </shema>
-- output your answer in json format, enclosed in tag <answer>, so that the user can use pydantic basemodel.parse_obj() to parse the json string into an object which defined as:
+- output your answer in json markdown format, so that the user can use pydantic basemodel.parse_obj() to parse the json string into an object which defined as:
  <schema>
  {schema}
  </shema>

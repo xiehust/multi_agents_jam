@@ -458,11 +458,11 @@ def save_as_docx(characters,story, fname, suffix='_refined'):
     document.add_heading('Characters introduction', level=1)
     character = characters.main_character
     document.add_heading(f"{character.name}", level=2)
-    document.add_paragraph(f"Role: {character.role}\nAffiliation: {character.affiliation}\nBackground: {character.background}")
+    document.add_paragraph(f"Role: {character.role}\nBackground: {character.background}")
     document.add_picture(f'./images/{character.name}{suffix}.png', width=Inches(4))
     for character in characters.supporting_character:
         document.add_heading(f"{character.name}", level=2)
-        document.add_paragraph(f"Role: {character.role}\nAffiliation: {character.affiliation}\nBackground: {character.background}")
+        document.add_paragraph(f"Role: {character.role}\nBackground: {character.background}")
         document.add_picture(f'./images/{character.name}{suffix}.png', width=Inches(4))
 
     img_idx = 0
@@ -498,11 +498,11 @@ def save_as_docx_few(characters,story, fname,suffix=''):
     document.add_heading('Characters introduction', level=1)
     character = characters.main_character
     document.add_heading(f"{character.name}", level=2)
-    document.add_paragraph(f"Role: {character.role}\nAffiliation: {character.affiliation}\nBackground: {character.background}")
+    document.add_paragraph(f"Role: {character.role}\nBackground: {character.background}")
     document.add_picture(f'./images/{character.name}{suffix}.png', width=Inches(4))
     for character in characters.supporting_character:
         document.add_heading(f"{character.name}", level=2)
-        document.add_paragraph(f"Role: {character.role}\nAffiliation: {character.affiliation}\nBackground: {character.background}")
+        document.add_paragraph(f"Role: {character.role}\nBackground: {character.background}")
         document.add_picture(f'./images/{character.name}{suffix}.png', width=Inches(4))
 
     img_idx = 0

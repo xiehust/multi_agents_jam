@@ -22,8 +22,7 @@ class Outline(BaseModel):
     page_title: str = Field(..., description="Title of the comics book")
     chapters: List[Chapter] = Field(
         default_factory=list,
-        max_items=10,
-        description="Titles and descriptions for each chapter of the comics book.",
+        description="chapters of the comics book. limits to maximum 5 items",
     )
 
     @property
@@ -117,7 +116,7 @@ class Story(BaseModel):
     story_title: str = Field(..., title="Title of the comics book")
     chapters: List[DetailChapter] = Field(
         default_factory=list,
-        title="Titles and descriptions for each chapter of the comics book.",
+        description="chapters of the comics book. limits to maximum 5 items",
     )
     images: Optional[List[Any]] = Field(default=[], title="List of illustration for each chapter")
     

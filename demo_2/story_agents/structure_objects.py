@@ -22,7 +22,8 @@ class Outline(BaseModel):
     page_title: str = Field(..., description="Title of the comics book")
     chapters: List[Chapter] = Field(
         default_factory=list,
-        description="chapters of the comics book. limits to maximum 5 items",
+        max_items=10,
+        description="Titles and descriptions for each chapter of the comics book.",
     )
 
     @property
@@ -85,15 +86,17 @@ class Paragragh(BaseModel):
 
 class DetailChapter(BaseModel):
     """
-        a chapter consists of mutilple paragrahs
+        Content of the Chapter
     """
     chapter_title: str = Field(..., description="Title of the chapter")
-    paragraphs: List[Paragragh] = Field(..., description="List of paragraghs of the chapter")
+    content: str = Field(..., description="Content of the chapter")
+    # paragraphs: List[Paragragh] = Field(max_items=1, 
+    #                                     description="List of paragraghs of the chapter, limits to maximum 1 item")
     
     @property
     def as_str(self) -> str:
-        chapter_content = "\n".join([p.content for p in self.paragraphs])
-        return f"## {self.chapter_title}\n\n{chapter_content}".strip()
+        # chapter_content = "\n".join([p.content for p in self.paragraphs])
+        return f"## {self.chapter_title}\n\n{self.content}".strip()
     
 class EditorSuggestion(BaseModel):
     """
@@ -101,7 +104,6 @@ class EditorSuggestion(BaseModel):
     """
     suggestions: List[str] = Field(
       description="suggestion list",
-      max_items=10,
     )
     @property
     def as_str(self) -> str:
@@ -116,11 +118,10 @@ class Story(BaseModel):
     story_title: str = Field(..., title="Title of the comics book")
     chapters: List[DetailChapter] = Field(
         default_factory=list,
-        description="chapters of the comics book. limits to maximum 5 items",
+        title="Titles and descriptions for each chapter of the comics book.",
     )
     images: Optional[List[Any]] = Field(default=[], title="List of illustration for each chapter")
     
-    @property
     def as_str(self) -> str:
-        chapter = "\n\n".join(chapter.as_str for chapter in self.chapters)
-        return f"# {self.story_title}\n\n{chapter}".strip()
+        chapter_content = "\n".join([p.content for p in self.paragraphs])
+        return f"## {self.chapter_title}\n\n{chapter_content}".strip()

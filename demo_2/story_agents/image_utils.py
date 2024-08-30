@@ -468,17 +468,18 @@ def save_as_docx(characters,story, fname, suffix='_refined'):
     img_idx = 0
     for chapter in story.chapters:
         document.add_heading(chapter.chapter_title, level=1)
-        for para in chapter.paragraphs:
-            print(para)
-            image = story.images[img_idx]
-            img_idx += 1
-            document.add_paragraph(para.content)
+        para = chapter
+        print(para)
+        images = story.images[img_idx]
+        img_idx += 1
+        document.add_paragraph(para.content)
 
-            # Add the image
-            if image:
-                document.add_picture(image, width=Inches(6))
-            else:
-                document.add_picture('placeholder.png', width=Inches(6))
+        # Add the image
+        if images:
+            [document.add_picture(image, width=Inches(6)) for image in images] 
+        else:
+            document.add_picture('placeholder.png', width=Inches(6))
+
 
     # Save the document
     document.save(fname)
@@ -491,7 +492,7 @@ def save_as_docx(characters,story, fname, suffix='_refined'):
 
 
 
-def save_as_docx_few(characters,story, fname,suffix=''):
+def save_as_docx_old(characters,story, fname,suffix=''):
     document = Document()
 
     document.add_heading(story.story_title, 0)

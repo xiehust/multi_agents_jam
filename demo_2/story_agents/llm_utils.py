@@ -37,6 +37,7 @@ class CustJsonOuputParser(BaseOutputParser[str]):
         match = re.search(pattern, text, re.DOTALL)
         if match:
             text = match.group(1)
+            text = re.sub(r'(?:\\+)n', '\n', text)
         else:
             return {}    
         text = preprocess_answer_json(text)
@@ -60,7 +61,7 @@ class TextOuputParser(BaseOutputParser[str]):
             text = match.group(1)
             return text.strip()
         else:
-            return ''
+            raise JSONDecodeError
 
     @property
     def _type(self) -> str:

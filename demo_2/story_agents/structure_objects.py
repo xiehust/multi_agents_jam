@@ -121,7 +121,9 @@ class Story(BaseModel):
         title="Titles and descriptions for each chapter of the comics book.",
     )
     images: Optional[List[Any]] = Field(default=[], title="List of illustration for each chapter")
-    
+    identity_images: Optional[List[Any]] = Field(default=[], title="List of character identity images")
+
+
     def as_str(self) -> str:
         chapter_content = "\n".join([p.content for p in self.paragraphs])
         return f"## {self.chapter_title}\n\n{chapter_content}".strip()

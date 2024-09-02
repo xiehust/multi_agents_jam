@@ -459,11 +459,11 @@ def save_as_docx(characters,story, fname, suffix='_refined'):
     character = characters.main_character
     document.add_heading(f"{character.name}", level=2)
     document.add_paragraph(f"Role: {character.role}\nBackground: {character.background}")
-    document.add_picture(f'./images/{character.name}{suffix}.png', width=Inches(4))
-    for character in characters.supporting_character:
+    document.add_picture(story.identity_images[0], width=Inches(4))
+    for character,id_img in zip(characters.supporting_character,story.identity_images):
         document.add_heading(f"{character.name}", level=2)
         document.add_paragraph(f"Role: {character.role}\nBackground: {character.background}")
-        document.add_picture(f'./images/{character.name}{suffix}.png', width=Inches(4))
+        document.add_picture(id_img, width=Inches(4))
 
     img_idx = 0
     for chapter in story.chapters:
@@ -479,7 +479,6 @@ def save_as_docx(characters,story, fname, suffix='_refined'):
             [document.add_picture(image, width=Inches(6)) for image in images] 
         else:
             document.add_picture('placeholder.png', width=Inches(6))
-
 
     # Save the document
     document.save(fname)

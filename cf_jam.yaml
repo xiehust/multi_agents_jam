@@ -42,7 +42,7 @@ Resources:
               chown -R ec2-user:ec2-user /home/ec2-user/SageMaker/
 
                # Start to deploy the sagemaker endpoint
-              nohup /home/ec2-user/anaconda3/envs/JupyterSystemEnv/bin/jupyter nbconvert --to notebook --ExecutePreprocessor.timeout=1800 --execute /home/ec2-user/SageMaker/StoryDiffusion/sagemaker_deploy.ipynb --stdout --debug &
+              nohup /home/ec2-user/anaconda3/envs/JupyterSystemEnv/bin/jupyter nbconvert --to notebook --ExecutePreprocessor.timeout=-1 --execute /home/ec2-user/SageMaker/StoryDiffusion/sagemaker_deploy.ipynb &
               echo "Notebook execution completed."
 
   ExecutionRole:
@@ -79,8 +79,8 @@ Resources:
                   - 's3:ListBucket'
                   - 's3:GetObject'
                   - 's3:PutObject'
-                  - 's3:CreateBucket'
                   - 's3:DeleteObject'
+                  - 's3:CreateBucket'
                 Resource:
                   - !Sub 'arn:aws:s3:::sagemaker-${AWS::Region}-${AWS::AccountId}'
                   - !Sub 'arn:aws:s3:::sagemaker-${AWS::Region}-${AWS::AccountId}/*'
@@ -114,7 +114,7 @@ Resources:
                 Action:
                   - 'bedrock:GetUseCaseForModelAccess'
                   - 'bedrock:PutUseCaseForModelAccess'
-                Resource: '*'
+                Resource: !Sub 'arn:aws:bedrock:${AWS::Region}::foundation-model/mistral*'
               - Effect: Allow
                 Action:
                   - 'sagemaker:AddTags'
@@ -125,12 +125,15 @@ Resources:
                   - 'sagemaker:InvokeEndpointWithResponseStream'
                   - 'sagemaker:DescribeEndpoint'
                   - 'sagemaker:InvokeEndpoint'
-                  - 'sagemaker:Search'
                 Resource: !Sub 'arn:aws:sagemaker:${AWS::Region}:${AWS::AccountId}:*'
               - Effect: Allow
                 Action:
                   - 'iam:PassRole'
                 Resource: !Sub 'arn:aws:iam::${AWS::AccountId}:role/*'
+                Condition:
+                  StringEquals:
+                    'iam:PassedToService':
+                      - 'sagemaker.amazonaws.com'
               - Effect: Allow
                 Action:
                   - 'ecr:DescribeRepositories'
@@ -145,6 +148,10 @@ Resources:
                 Action:
                   - 'ecr:GetAuthorizationToken'
                 Resource: '*'
+                Condition:
+                  StringEquals:
+                    'aws:RequestedRegion': 
+                      - !Sub ${AWS::Region}
 
 Outputs:
   NotebookInstanceName:

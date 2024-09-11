@@ -109,7 +109,7 @@ Resources:
                   - 'bedrock:InvokeModelWithResponseStream'
                   - 'bedrock:InvokeModel'
                   - 'bedrock:ListFoundationModels'
-                Resource: !Sub 'arn:aws:bedrock:${AWS::Region}::foundation-model/*'
+                Resource: !Sub 'arn:aws:bedrock:${AWS::Region}::foundation-model/mistral*'
               - Effect: Allow
                 Action:
                   - 'bedrock:GetUseCaseForModelAccess'
@@ -118,18 +118,30 @@ Resources:
               - Effect: Allow
                 Action:
                   - 'sagemaker:AddTags'
+                Resource: !Sub 'arn:aws:sagemaker:${AWS::Region}:${AWS::AccountId}:*'
+              - Effect: Allow
+                Action:
+                  - 'sagemaker:CreateModel'
+                Resource: !Sub 'arn:aws:sagemaker:${AWS::Region}:${AWS::AccountId}:model/story-diffusion-inference-api*'
+              - Effect: Allow
+                Action:
                   - 'sagemaker:CreateEndpoint'
                   - 'sagemaker:CreateEndpointConfig'
-                  - 'sagemaker:CreateModel'
                   - 'sagemaker:InvokeEndpointAsync'
                   - 'sagemaker:InvokeEndpointWithResponseStream'
                   - 'sagemaker:DescribeEndpoint'
                   - 'sagemaker:InvokeEndpoint'
-                Resource: !Sub 'arn:aws:sagemaker:${AWS::Region}:${AWS::AccountId}:*'
+                Resource: 
+                  - !Sub 'arn:aws:sagemaker:${AWS::Region}:${AWS::AccountId}:endpoint/story-diffusion-inference-api*'
+                  - !Sub 'arn:aws:sagemaker:${AWS::Region}:${AWS::AccountId}:endpoint-config/story-diffusion-inference-api*'
+
               - Effect: Allow
                 Action:
                   - 'iam:PassRole'
-                Resource: !Sub 'arn:aws:iam::${AWS::AccountId}:role/*'
+                Resource: 
+                  - !Sub 'arn:aws:iam::${AWS::AccountId}:role/LabStack-prewarm*'
+                  - !Sub 'arn:aws:iam::${AWS::AccountId}:role/AmazonSageMaker-ExecutionRole*'
+                  - !Sub 'arn:aws:iam::${AWS::AccountId}:role/*AWSServiceRoleForAmazonSageMakerNotebooks'
                 Condition:
                   StringEquals:
                     'iam:PassedToService':

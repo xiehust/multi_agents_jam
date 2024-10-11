@@ -2,6 +2,8 @@ import base64
 import io
 import re
 import json
+import uuid
+import tempfile
 import boto3
 from PIL import Image
 from botocore.exceptions import ClientError
@@ -39,6 +41,8 @@ class ImageError(Exception):
         self.message = message
 
 
+    
+    
 class ImageGenerator(BaseModel):
     """
         invoke SDXL model in a Amaozn Bedrock to generate identity images
@@ -197,6 +201,106 @@ def get_bucket_and_key(s3uri):
     bucket = s3uri[5:pos]
     key = s3uri[pos + 1 :]
     return bucket, key
+
+def predict(endpoint_name,payload):
+    runtime_client = boto3.client('runtime.sagemaker')
+    response = runtime_client.invoke_endpoint(
+        EndpointName=endpoint_name,
+        ContentType='application/json',
+        Body=json.dumps(payload)
+    )
+    # print(response)
+    result = json.loads(response['Body'].read().decode())
+    # print(result)
+    return result
+
+
+class FluxGenerator():
+    def __init__(self,endpoint_name,workflow_json='story_agents/flux_nf4_workflow_api.json'):
+        self.endpoint_name = endpoint_name
+        self.workflow_json = workflow_json
+        self.s3_client = boto3.client('s3')        
+    
+    def generate_real_identity_images(self,prompt:str, general_prompt:str = '',style:str = "Photographic", height:int = 768, width :int = 768):
+        images = self.generate_images(general_prompt = general_prompt,
+                                                            style=style,
+                                                            comic_type = "Classic Comic Style",
+                                                            prompt_array=prompt,
+                                                            id_length= 0,
+                                                            sd_type = "Unstable",
+                                                            ref_imgs=[],height=height,width=width) 
+        return images[0]
+    
+    def generate_images(self,general_prompt:str,
+                        prompt_array:str,
+                        id_length:int=2, 
+                        ref_imgs: List[Any]= [],
+                        comic_type:str='Classic Comic Style', 
+                        style:str = 'Japanese Anime',
+                        sd_type:str="Unstable", 
+                        height:int = 768, 
+                        width :int = 768) -> list:
+        prompt_text=""
+        with open(self.workflow_json) as f:
+            prompt_text = json.load(f)
+            
+        prompt = f"{style} style {general_prompt} {prompt_array}"
+        prompt_text['47']['inputs']['text'] = prompt
+        prompt_text['46']['inputs']['width'] = width
+        prompt_text['46']['inputs']['height'] = height
+
+        print(f"prompt:{prompt}")
+        return self.run_inference(prompt_text)
+            
+    
+    def run_inference(self,prompt_text):
+        client_id = str(uuid.uuid4())
+        payload={
+             "client_id":client_id,
+             "prompt": prompt_text,
+             "inference_type":"text2img",
+             "method":"queue_prompt"
+        }
+        prompt_id = predict(self.endpoint_name,payload)["prompt_id"]
+        print("submit image generating request:"+str(prompt_id))
+
+ 
+        payload={
+         "client_id":client_id,
+         "prompt_id":prompt_id,
+         "inference_type":"text2img",
+         "method":"get_status"
+        }
+        while True:
+            status = predict(self.endpoint_name,payload)
+            # print("status:"+status['status'])
+            time.sleep(5)
+            if status["status"] == "success":
+                break
+
+
+        payload={
+         "client_id":client_id,
+         "prompt_id":prompt_id,
+         "inference_type":"text2img",
+         "method":"get_images"
+        }
+        result = predict(self.endpoint_name,payload)
+        # print("results:"+str(result['prediction']))
+
+        image_list = []
+        for s3_url in result['prediction']:
+
+            bucket_name = s3_url.split('/')[2]
+            object_key = '/'.join(s3_url.split('/')[3:])
+            # download images
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as temp_file:
+                self.s3_client.download_fileobj(bucket_name, object_key, temp_file)
+                temp_file_path = temp_file.name
+            image = Image.open(temp_file_path)
+            image_list.append(image)
+            os.unlink(temp_file_path)
+        return image_list
 
 class StoryDiffusionGenerator():
     """
